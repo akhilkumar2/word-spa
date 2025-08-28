@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Word & Picture SPA</title>
+  <title>Word & Picture SPA (Modes)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -48,31 +48,103 @@
         width: 80%;
       }
     }
+    #loading {
+      font-size: 1.2rem;
+      color: #555;
+      margin: 1rem 0;
+      display: none;
+    }
+    .mode-selector {
+      margin: 1rem;
+    }
   </style>
 </head>
 <body>
   <h1 id="word">Tap Below</h1>
+  <div class="mode-selector">
+    <label><input type="radio" name="mode" value="all" checked> All words</label>
+    <label><input type="radio" name="mode" value="child"> Child mode</label>
+  </div>
+  <div id="loading">⏳ Loading dictionary, please wait...</div>
   <img id="picture" src="" alt="Word picture" style="display:none;">
-  <button onclick="showWord()">Show Word & Picture</button>
+  <button id="btn" onclick="showWord()" disabled>Show Word & Picture</button>
 
   <script>
-    const words = [
-      { text: "CAT", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/320px-Cat03.jpg" },
-      { text: "DOG", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Dog_in_the_garden.JPG/320px-Dog_in_the_garden.JPG" },
-      { text: "SUN", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Sun_white.jpg/320px-Sun_white.jpg" },
-      { text: "CAR", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Tesla_Model_3_parked%2C_front_driver_side.jpg/320px-Tesla_Model_3_parked%2C_front_driver_side.jpg" },
-      { text: "FAN", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Table_fan.jpg/320px-Table_fan.jpg" },
-      { text: "OWL", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Ural_owl_%28Strix_uralensis%29%2C_Moravsk%C3%BD_kras.jpg/320px-Ural_owl_%28Strix_uralensis%29%2C_Moravsk%C3%BD_kras.jpg" },
-      { text: "BUS", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/London_red_bus_in_London_August_2009.jpg/320px-London_red_bus_in_London_August_2009.jpg" }
+    let dictionary = [];
+    let usedWords = [];
+    let mode = "all";
+
+    const childWords = [
+      "CAT","DOG","SUN","CAR","OWL","BUS","FAN","PEN","JAR","COW","PIG","TOY","BED","HEN","ANT","BAT"
     ];
 
-    function showWord() {
-      const choice = words[Math.floor(Math.random() * words.length)];
-      document.getElementById("word").textContent = choice.text;
-      const img = document.getElementById("picture");
-      img.src = choice.img;
-      img.style.display = "block";
+    document.querySelectorAll('input[name="mode"]').forEach(el => {
+      el.addEventListener("change", e => {
+        mode = e.target.value;
+        usedWords = [];
+      });
+    });
+
+    // Load dictionary from GitHub raw file
+    async function loadDictionary() {
+      document.getElementById("loading").style.display = "block";
+      const url = "https://raw.githubusercontent.com/dwyl/english-words/master/words_dictionary.json";
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        // Extract only 3- and 4-letter words
+        dictionary = Object.keys(data).filter(w => w.length === 3 || w.length === 4);
+        console.log("Loaded", dictionary.length, "words");
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("btn").disabled = false;
+      } catch (e) {
+        document.getElementById("loading").textContent = "⚠️ Failed to load dictionary. Try again later.";
+      }
     }
+
+    async function fetchImage(word) {
+      const url = `https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=400&generator=search&gsrsearch=${word}&gsrlimit=1`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.query) {
+        const pages = Object.values(data.query.pages);
+        if (pages[0].thumbnail) {
+          return pages[0].thumbnail.source;
+        }
+      }
+      return "";
+    }
+
+    async function showWord() {
+      let pool = (mode === "child") ? childWords : dictionary;
+
+      if (pool.length === 0) {
+        alert("Dictionary not loaded yet. Please wait a moment and try again.");
+        return;
+      }
+      if (usedWords.length === pool.length) {
+        usedWords = []; // reset if all words used
+      }
+      let word;
+      do {
+        word = pool[Math.floor(Math.random() * pool.length)];
+      } while (usedWords.includes(word));
+
+      usedWords.push(word);
+      document.getElementById("word").textContent = word.toUpperCase();
+
+      const imgUrl = await fetchImage(word);
+      const img = document.getElementById("picture");
+      if (imgUrl) {
+        img.src = imgUrl;
+        img.style.display = "block";
+      } else {
+        img.style.display = "none";
+      }
+    }
+
+    // Load the dictionary when page starts
+    loadDictionary();
   </script>
 </body>
 </html>
