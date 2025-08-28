@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Word & Picture SPA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f8f9fa;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin: 1rem 0;
+      color: #333;
+    }
+    img {
+      max-width: 80%;
+      max-height: 300px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      margin: 1rem 0;
+    }
+    button {
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+      button {
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 id="word">Tap Below</h1>
+  <img id="picture" src="" alt="Word picture" style="display:none;">
+  <button onclick="showWord()">Show Word & Picture</button>
+
+  <script>
+    const words = [
+      { text: "CAT", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/320px-Cat03.jpg" },
+      { text: "DOG", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Dog_in_the_garden.JPG/320px-Dog_in_the_garden.JPG" },
+      { text: "SUN", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Sun_white.jpg/320px-Sun_white.jpg" },
+      { text: "CAR", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Tesla_Model_3_parked%2C_front_driver_side.jpg/320px-Tesla_Model_3_parked%2C_front_driver_side.jpg" },
+      { text: "FAN", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Table_fan.jpg/320px-Table_fan.jpg" },
+      { text: "OWL", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Ural_owl_%28Strix_uralensis%29%2C_Moravsk%C3%BD_kras.jpg/320px-Ural_owl_%28Strix_uralensis%29%2C_Moravsk%C3%BD_kras.jpg" },
+      { text: "BUS", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/London_red_bus_in_London_August_2009.jpg/320px-London_red_bus_in_London_August_2009.jpg" }
+    ];
+
+    function showWord() {
+      const choice = words[Math.floor(Math.random() * words.length)];
+      document.getElementById("word").textContent = choice.text;
+      const img = document.getElementById("picture");
+      img.src = choice.img;
+      img.style.display = "block";
+    }
+  </script>
+</body>
+</html>
